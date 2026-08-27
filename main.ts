@@ -9,17 +9,27 @@ Deno.serve(async (req) => {
   }
   try {
     const url = new URL(req.url);
-    url.hostname = "ucplfdgpek1fobmmbmhp.supabase.co";
-    url.protocol = "https:";
-    url.port = "443";
-    const newReq = new Request(url, req);
-    newReq.headers.set("host", "ucplfdgpek1fobmmbmhp.supabase.co");
-    const res = await fetch(newReq);
-    const h = new Headers(res.headers);
-    h.set("Access-Control-Allow-Origin", "*");
-    h.set("Access-Control-Allow-Methods", "*");
-    h.set("Access-Control-Allow-Headers", "*");
-    return new Response(res.body, { status: res.status, headers: h });
+    // هنا الصحيح بحرف L
+    const targetUrl = `https://ucplfdgpeklfobmmbmhp.supabase.co${url.pathname}${url.search}`;
+    
+    const headers = new Headers();
+    for (const [k, v] of req.headers.entries()) {
+      if (k.toLowerCase() === "host" || k.toLowerCase() === "connection") continue;
+      headers.set(k, v);
+    }
+
+    const res = await fetch(targetUrl, {
+      method: req.method,
+      headers,
+      body: req.method !== "GET" && req.method !== "HEAD" ? req.body : undefined,
+    });
+
+    const resHeaders = new Headers(res.headers);
+    resHeaders.set("Access-Control-Allow-Origin", "*");
+    resHeaders.set("Access-Control-Allow-Methods", "*");
+    resHeaders.set("Access-Control-Allow-Headers", "*");
+    
+    return new Response(res.body, { status: res.status, headers: resHeaders });
   } catch (e) {
     return new Response(JSON.stringify({ proxyError: String(e) }), {
       status: 500,
