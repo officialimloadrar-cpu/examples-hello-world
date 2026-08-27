@@ -5,21 +5,15 @@ Deno.serve(async (req) => {
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, prefer, range, content-range, x-supabase-api-version",
     "Access-Control-Expose-Headers": "content-range, content-length",
   };
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: cors });
-  }
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
   const url = new URL(req.url);
   const targetUrl = `https://ucplfdgpeklfobmmbmhp.supabase.co${url.pathname}${url.search}`;
   const headers = new Headers();
-  for (const [k, v] of req.headers.entries()) {
+  for (const [k,v] of req.headers.entries()) {
     if (["host","connection"].includes(k.toLowerCase())) continue;
-    headers.set(k, v);
+    headers.set(k,v);
   }
-  const res = await fetch(targetUrl, {
-    method: req.method,
-    headers,
-    body: req.method !== "GET" && req.method !== "HEAD" ? req.body : undefined,
-  });
+  const res = await fetch(targetUrl, { method: req.method, headers, body: req.method !== "GET" && req.method !== "HEAD" ? req.body : undefined });
   const resHeaders = new Headers(res.headers);
   Object.entries(cors).forEach(([k,v]) => resHeaders.set(k,v));
   return new Response(res.body, { status: res.status, headers: resHeaders });
